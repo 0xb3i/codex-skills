@@ -1,0 +1,4 @@
+interface:
+  display_name: "简历项目与面试写作"
+  short_description: "面向算法岗的技术简历、项目叙事、面试问答与前沿素材检索"
+  default_prompt: "Use $resume-project-writer to refine my technical resume project and prepare interview follow-up Q&A."
