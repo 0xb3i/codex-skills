@@ -1,0 +1,4 @@
+interface:
+  display_name: "Argos PPE Debug"
+  short_description: "排查 PPE 泳道的 Argos 选品日志。"
+  default_prompt: "排查 bytedance.agent.ecom_affiliate 在 ppe_product_selection_niubei 的 Planner/Executor/tool 日志，默认查最近 15 分钟并包含 niubei。"

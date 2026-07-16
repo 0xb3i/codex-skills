@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+NODE_BIN="${ASK_FEISHU_NODE:-/Users/bytedance/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node}"
+NODE_MODS="${ASK_FEISHU_NODE_MODULES:-/Users/bytedance/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}"
+
+export NODE_PATH="${NODE_MODS}${NODE_PATH:+:${NODE_PATH}}"
+if [[ "${1:-}" == "--self-test" ]]; then
+  exec "$NODE_BIN" "$ROOT/lib/ask_feishu.js" --self-test
+fi
+exec "$NODE_BIN" "$ROOT/lib/ask_feishu.js" ask "$@"

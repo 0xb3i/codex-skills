@@ -1,0 +1,4 @@
+interface:
+  display_name: "飞书文档润色"
+  short_description: "把飞书素材、草稿和评论烹饪成结构清晰、适合汇报协作的文档"
+  default_prompt: "Use $polishing-feishu-docs to turn this Feishu doc's rough material and comments into a polished, conclusion-first document."

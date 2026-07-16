@@ -1,0 +1,4 @@
+interface:
+  display_name: "数据整理"
+  short_description: "整理混乱目录、合并分散审阅产物，并清理临时废弃文件"
+  default_prompt: "Use $data-organizer to organize this folder into a shallow, searchable file structure."

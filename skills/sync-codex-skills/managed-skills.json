@@ -1,0 +1,21 @@
+{
+  "local_to_remote": {
+    "mistake-notebook": {
+      "repo": "/Users/bytedance/dotfiles-codex",
+      "server": "cloudide-wsed9ab0d425c9aa57",
+      "server_repo": "~/dotfiles-codex"
+    },
+    "self-improve-skills": {
+      "repo": "/Users/bytedance/dotfiles-codex",
+      "server": "cloudide-wsed9ab0d425c9aa57",
+      "server_repo": "~/dotfiles-codex"
+    }
+  },
+  "remote_to_local": {
+    "mistake-notebook": {
+      "repo": "/Users/bytedance/dotfiles-codex",
+      "server": "cloudide-wsed9ab0d425c9aa57",
+      "server_repo": "~/dotfiles-codex"
+    }
+  }
+}

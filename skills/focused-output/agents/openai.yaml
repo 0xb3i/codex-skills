@@ -1,0 +1,4 @@
+interface:
+  display_name: "Focused Output"
+  short_description: "结论先行，用合适格式讲清问题"
+  default_prompt: "Use $focused-output when answering a user question."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "DOCX Template Fill"
+  short_description: "Fill Word templates without losing formatting"
+  default_prompt: "Use $docx-template-fill to fill this Word template while preserving the original formatting."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill 自改进"
+  short_description: "复盘 Skill 使用过程，记录问题并沉淀可验证最小改进"
+  default_prompt: "请使用 $self-improve-skills 复盘最近一次 Skill 使用，并在安全时写入最小改进。"
