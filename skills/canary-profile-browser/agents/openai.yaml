@@ -1,4 +1,0 @@
-interface:
-  display_name: "Canary Profile Browser"
-  short_description: "启动/连接 Chrome Canary 调试端口并复用本机 Chrome profile 操作页面"
-  default_prompt: "连接 Chrome Canary 调试端口，并用本机 profile 打开目标页面。"

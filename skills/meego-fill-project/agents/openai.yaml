@@ -1,4 +1,0 @@
-interface:
-  display_name: "Meego 填写项目"
-  short_description: "按常用 Meego 项目自动开子任务并填写项目属性"
-  default_prompt: "Use $meego-fill-project to add a weekly Meego project entry from a saved project alias or URL and fill its attributes."

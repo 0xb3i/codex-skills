@@ -1,4 +1,0 @@
-interface:
-  display_name: "Trae Codex Maintenance"
-  short_description: "Diagnose and reapply local/remote Trae CN Codex patches."
-  default_prompt: "Diagnose Trae CN or Codex sidebar, remote SSH, diff-view, or injection regressions using the local maintenance scripts."

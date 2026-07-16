@@ -1,4 +1,0 @@
-interface:
-  display_name: "ByteFaaS 编译发版"
-  short_description: "编译并发布 ByteFaaS 函数到 US-TTP"
-  default_prompt: "Use $bytefaas-release to 编译 debug_ppe 并发版，版本描述为测试修复。"

@@ -1,4 +1,0 @@
-interface:
-  display_name: "周报整理"
-  short_description: "把零散项目进展和指标整理成可直接粘贴的中文周报段落"
-  default_prompt: "Use $weekly-report to turn my rough weekly notes into a concise Chinese weekly report with next steps."
