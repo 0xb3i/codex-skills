@@ -1,0 +1,4 @@
+interface:
+  display_name: "Course Paper Writing"
+  short_description: "中文课程论文写作与编译工作流"
+  default_prompt: "Use $course-paper-writing to draft or revise report/manuscript.md and compile the latest report/report.docx with the thesis-docx backend."

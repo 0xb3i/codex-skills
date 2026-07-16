@@ -1,0 +1,4 @@
+interface:
+  display_name: "Thesis DOCX"
+  short_description: "Academic DOCX thesis workflow"
+  default_prompt: "Use $thesis-docx to create or restyle an academic paper DOCX with TOC, citations, and strict typography."

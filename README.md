@@ -24,7 +24,7 @@ rsync -a --delete --exclude .git ~/codex-skills/skills/ ~/.codex/skills/
 上面的命令会让 `~/.codex/skills` 与本仓库完全一致。若另一台电脑还有本仓库之外的本地私有 skills，改用逐个复制：
 
 ```bash
-for skill in data-organizer docx-template-fill focused-output mistake-notebook polishing-feishu-docs self-improve-skills; do
+for skill in course-paper-writing data-organizer docx-template-fill focused-output mistake-notebook polishing-feishu-docs self-improve-skills thesis-docx; do
   rsync -a --delete ~/codex-skills/skills/$skill/ ~/.codex/skills/$skill/
 done
 ```
@@ -42,9 +42,11 @@ git -C ~/codex-skills push
 
 | Skill | 用途 |
 | --- | --- |
+| `course-paper-writing` | 撰写和迭代中文课程论文 Markdown，并在每轮修改后通过 `thesis-docx` 编译最终 DOCX。 |
 | `data-organizer` | 整理混乱的数据目录或工作区，进行归档、重命名、分组、扁平化、合并索引和清理临时文件。 |
 | `docx-template-fill` | 填写现有 Word `.docx` 模板、表单、访谈模板或问卷，同时尽量保留原始版式、字体、边框和页面布局。 |
 | `focused-output` | 优化面向用户的回答、解释、摘要、建议、分析、状态更新、代码审查和最终回复。 |
 | `mistake-notebook` | 在发现反复出错、用户纠正、隐藏坑点或可能复发的问题时，判断并更新全局或项目级 `AGENTS.md`。 |
 | `polishing-feishu-docs` | 将粗糙的 Feishu/Lark 文档材料润色为更适合汇报的文档，包含结构调整、结论提炼、表格、标注和流程图建议。 |
 | `self-improve-skills` | 复盘并改进已有 Codex skill，在发现遗漏触发、失败路径、边界情况或过时说明时做最小必要更新。 |
+| `thesis-docx` | 将 Markdown、元数据和 BibTeX 编译为排版完整的论文 DOCX，并可导出 PDF。 |

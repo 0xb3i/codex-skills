@@ -1,0 +1,78 @@
+{
+  "major_title": "某某某某课程论文",
+  "title": "复旦大学课程论文 DOCX 模板示例",
+  "title_en": "Fudan University Course Paper DOCX Template Demo",
+  "author": "牛蓓",
+  "date": "2026年3月28日",
+  "cover_fields": [
+    {
+      "label": "学生姓名",
+      "value": "牛蓓"
+    },
+    {
+      "label": "学生学号",
+      "value": "25210690108"
+    },
+    {
+      "label": "专业班级",
+      "value": "应用统计"
+    },
+    {
+      "label": "指导老师",
+      "value": "张某某"
+    },
+    {
+      "label": "所在院系",
+      "value": "管理学院"
+    }
+  ],
+  "abstract_zh": "本文展示如何将复旦大学课程论文模板的核心版式迁移到 DOCX 工作流中。该模板保留封面、摘要、目录、图表目录、页眉页脚和附录等常用组件，并将具体格式收敛到一个可复用的 profile 文件中。",
+  "keywords_zh": [
+    "复旦大学",
+    "课程论文",
+    "DOCX",
+    "模板"
+  ],
+  "abstract_en": "This sample demonstrates how to port the core layout of the Fudan University course paper template into a DOCX workflow. The profile keeps the cover page, abstracts, table of contents, figure and table lists, headers, footers, and appendices in a reusable configuration.",
+  "keywords_en": [
+    "Fudan University",
+    "course paper",
+    "DOCX",
+    "template"
+  ],
+  "sections": [
+    {
+      "title": "引言",
+      "body": "介绍论文背景、问题定义与本文的结构安排。"
+    },
+    {
+      "title": "模板映射设计",
+      "body": "说明如何将 LaTeX 模板中的字号、字体、目录、页眉页脚、附录和参考文献规则映射到 DOCX。"
+    },
+    {
+      "title": "实现流程",
+      "body": "说明 Markdown、BibTeX、Pandoc、DOCX 后处理脚本各自承担的职责。",
+      "children": [
+        {
+          "title": "内容源",
+          "body": "正文内容建议以 Markdown 维护。"
+        },
+        {
+          "title": "版式源",
+          "body": "版式要求集中维护在 profile JSON 中。"
+        }
+      ]
+    },
+    {
+      "title": "结论",
+      "body": "总结 HNU profile 的可复用方式与后续扩展方向。"
+    }
+  ],
+  "acknowledgements": "感谢原始 HNU LaTeX 模板作者提供清晰的版式定义，使 DOCX 版复刻具备明确参照。",
+  "appendices": [
+    {
+      "title": "字段说明",
+      "body": "补充列出 metadata 与 profile 中常见字段。"
+    }
+  ]
+}
