@@ -68,7 +68,7 @@ cp -n ~/codex-skills/AGENTS.md "$codex_dir/AGENTS.md"
 
 </details>
 
-`code-master` 的内部代码平台适配需要对应环境；`self-improve-skills` 创建技能时使用 Codex 内置的 `skill-creator`。
+`self-improve-skills` 创建技能时使用 Codex 内置的 `skill-creator`。
 
 ---
 

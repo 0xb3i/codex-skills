@@ -1,41 +1,23 @@
 #!/usr/bin/env python3
 """
-diff_and_filter.py — 执行 git diff、过滤待评审文件，并完成自定义 workflow preflight。
+diff_and_filter.py — 使用本地 Git diff 生成待评审文件列表。
 
-一次调用默认会输出以下产物：
-  - diff_files.md：原始变更文件列表
-  - review_files.md：过滤后的待评审文件列表
-  - custom_workflows.json：仓库级自定义 workflow 列表
-  - codespec_pe.md：若命中 codespec workflow，则额外准备本地检测指令
+输出 diff_files.md、review_files.md 和 diff_stats.json。
 
 用法:
     python3 diff_and_filter.py --diff-range <range> --repo-root <path> --output-dir <dir>
 
-示例:
-    python3 diff_and_filter.py \
-        --diff-range "HEAD~1..HEAD" \
-        --repo-root /path/to/repo \
-        --output-dir /tmp/myrepo_1234
-
-退出码约定：仅 diff 过滤本身失败（必选步骤）时返回非 0；集成 preflight 的
-可选资源（自定义 workflow、codespec 规则）拉取失败不阻塞，记日志并把对应
-workflow 标记 status=skipped 后正常返回 0。
+Git 查询或必需产物写入失败时返回非零退出码。无需网络或平台凭据。
 """
 
 import argparse
-import fnmatch
 import json
 import os
-import re
-import ssl
 import subprocess
 import sys
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
 from pathlib import PurePosixPath
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 # ---------- 排除规则 ----------
 
@@ -106,7 +88,7 @@ BINARY_EXTS = {
     ".glif", ".lo", ".mine", ".p", ".pro", ".rkt", ".snap", ".ss",
 }
 
-VENDOR_DIRS = {"vendor", "node_modules", "third_party", "external", "third_deps", "GloryPacketCapture", "xtern"}
+VENDOR_DIRS = {"vendor", "node_modules", "third_party", "external", "third_deps", "xtern"}
 
 SKIP_BASENAMES = {"LICENSE"}
 
@@ -114,10 +96,9 @@ SKIP_BASENAMES = {"LICENSE"}
 GENERATED_DIRS = {
     "__test__", "__tests__",
     "__mock__", "__mocks__", "mock", "mocks",
-    "bam", "bam-auto-generate",
     "gen", "idl",
-    "kitex_gen", "kitty_context", "kitty_server",
-    "pb_gen", "pk_gen", "rpc_gen", "rpcauto",
+    "kitex_gen",
+    "pb_gen", "rpc_gen",
     "test", "tests",
     "thrift_gen", "thrift_models",
 }
@@ -128,7 +109,6 @@ GENERATED_SUBPATHS = (
     ("rpc", "clients"),
     ("rpc", "plugin"),
     ("rpc", "rpc"),
-    ("rpc", "rpcauto"),
 )
 
 
@@ -215,14 +195,12 @@ def _is_lock_file(path: str) -> bool:
     return False
 
 
-_GENERATED_BASENAMES = {"facade.go", "idls.go", "kite.go", "wire.go"}
+_GENERATED_BASENAMES = {"wire.go"}
 _GENERATED_SUFFIXES = (
     ".pb.go", "_gen.go", ".gen.go", "_generated.go",
-    ".mock.go", ".thrift.go", "_bos.go",
+    ".mock.go", ".thrift.go",
     "_test.go",
-    ".testio",
     ".pbtxt", ".pbdata", ".pbbin",
-    "_tobedeleted",
 )
 
 
@@ -310,107 +288,6 @@ EXCLUDE_RULES: List[Tuple[str, object]] = [
 ]
 
 
-# ---------- 远程排除规则 ----------
-
-_REMOTE_CONFIG_URL = "https://9abqm0rn.fn.bytedance.net/smart/cr/flux_review_config"
-_REMOTE_TIMEOUT = 5
-
-_ssl_ctx = ssl.create_default_context()
-_ssl_ctx.check_hostname = False
-_ssl_ctx.verify_mode = ssl.CERT_NONE
-
-
-def _run_git_silent(args: List[str], cwd: Optional[str] = None) -> str:
-    try:
-        result = subprocess.run(
-            ["git"] + args, cwd=cwd,
-            capture_output=True, text=True, timeout=5,
-        )
-        return result.stdout.strip() if result.returncode == 0 else ""
-    except Exception:
-        return ""
-
-
-def _parse_repo_from_remote(remote: str) -> str:
-    if not remote:
-        return ""
-    s = remote.strip()
-    if s.endswith(".git"):
-        s = s[:-4]
-    if "://" not in s and ":" in s and "@" in s:
-        s = s.split(":", 1)[1]
-    else:
-        s = re.sub(r"^[a-zA-Z][a-zA-Z0-9+.\-]*://", "", s)
-        if "/" in s:
-            parts = s.split("/", 1)
-            if "." in parts[0] or "@" in parts[0]:
-                s = parts[1] if len(parts) > 1 else parts[0]
-    s = s.strip("/")
-    segments = [seg for seg in s.split("/") if seg]
-    if len(segments) >= 2:
-        return "/".join(segments[-2:])
-    return ""
-
-
-def _get_repo_name(repo_root: str) -> str:
-    remote = _run_git_silent(["remote", "get-url", "origin"], cwd=repo_root)
-    if not remote:
-        remotes = _run_git_silent(["remote"], cwd=repo_root)
-        first = (remotes.splitlines() or [""])[0].strip()
-        if first:
-            remote = _run_git_silent(["remote", "get-url", first], cwd=repo_root)
-    return _parse_repo_from_remote(remote)
-
-
-def _get_target_branch(repo_root: str) -> str:
-    branch = _run_git_silent(["rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_root)
-    if branch == "HEAD":
-        return ""
-    return branch
-
-
-def fetch_remote_exclusions(repo_root: str) -> List[str]:
-    """从远程接口拉取项目级排除 glob 列表。
-
-    返回去掉 '-' 前缀后的 glob 模式列表。
-    任何异常都吞掉返回空列表，不影响主流程。
-    """
-    _log_prefix = "[remote-exclusion]"
-    try:
-        repo_name = _get_repo_name(repo_root)
-        if not repo_name:
-            print(f"{_log_prefix} 无法解析 repo_name，跳过远程排除")
-            return []
-
-        branch = _get_target_branch(repo_root)
-        print(f"{_log_prefix} repo={repo_name}, branch={branch or '(empty, default master)'}")
-
-        params = f"repo_name={urllib.parse.quote(repo_name, safe='')}"
-        if branch:
-            params += f"&target_branch={urllib.parse.quote(branch, safe='')}"
-
-        url = f"{_REMOTE_CONFIG_URL}?{params}"
-        req = urllib.request.Request(url, method="GET")
-        with urllib.request.urlopen(req, timeout=_REMOTE_TIMEOUT, context=_ssl_ctx) as resp:
-            body = json.loads(resp.read().decode("utf-8", errors="replace"))
-
-        paths = body.get("paths")
-        if not paths or not isinstance(paths, list):
-            print(f"{_log_prefix} paths 为空或非列表，跳过")
-            return []
-
-        exclusions = []
-        for p in paths:
-            if isinstance(p, str) and p.startswith("-"):
-                exclusions.append(p[1:])
-
-        print(f"{_log_prefix} 解析到 {len(exclusions)} 条排除模式")
-        return exclusions
-    except Exception as e:
-        print(f"{_log_prefix} Warning: 拉取远程排除规则失败 ({e})，使用本地规则继续", file=sys.stderr)
-        return []
-
-
 # ---------- Git 操作 ----------
 
 def _run_git(repo_root: str, args: List[str]) -> subprocess.CompletedProcess:
@@ -430,40 +307,37 @@ def _run_git(repo_root: str, args: List[str]) -> subprocess.CompletedProcess:
 
 
 def get_diff_files(repo_root: str, diff_range: str) -> List[Tuple[str, str]]:
-    """运行 git diff --name-status，返回 [(status, filepath), ...]。"""
-    proc = _run_git(repo_root, ["diff", "--name-status", diff_range])
+    """返回变更状态和目标路径；NUL 分隔支持重命名与特殊路径。"""
+    proc = _run_git(repo_root, ["diff", "--name-status", "-z", "--find-renames", diff_range, "--"])
     if proc.returncode != 0:
-        stderr = (proc.stderr or "").strip()
-        print(f"Error: git diff --name-status 失败: {stderr}", file=sys.stderr)
+        print(f"Error: git diff --name-status 失败: {proc.stderr.strip()}", file=sys.stderr)
         sys.exit(1)
 
+    records = iter(proc.stdout.split("\0")[:-1])
     files = []
-    for line in proc.stdout.strip().splitlines():
-        parts = line.split("\t", 1)
-        if len(parts) != 2:
-            continue
-        status, filepath = parts[0].strip(), parts[1].strip()
-        # 状态码可能带数字（如 R100），取首字母
-        status = status[0] if status else "M"
+    for raw_status in records:
+        status = raw_status[0]
+        filepath = next(records)
+        if status in {"R", "C"}:
+            filepath = next(records)
         files.append((status, filepath))
     return files
 
 
 def get_line_stats(repo_root: str, diff_range: str) -> Dict[str, Tuple[int, int]]:
-    """运行 git diff --numstat，返回 {filepath: (added, deleted)}。"""
-    proc = _run_git(repo_root, ["diff", "--numstat", diff_range])
+    """返回各目标路径的增删行数，包括重命名记录。"""
+    proc = _run_git(repo_root, ["diff", "--numstat", "-z", "--find-renames", diff_range, "--"])
     if proc.returncode != 0:
-        stderr = (proc.stderr or "").strip()
-        if stderr:
-            print(f"Warning: git diff --numstat 失败: {stderr}", file=sys.stderr)
-        return {}
+        print(f"Error: git diff --numstat 失败: {proc.stderr.strip()}", file=sys.stderr)
+        sys.exit(1)
 
     stats: Dict[str, Tuple[int, int]] = {}
-    for line in proc.stdout.strip().splitlines():
-        parts = line.split("\t", 2)
-        if len(parts) != 3:
-            continue
-        added_str, deleted_str, filepath = parts
+    records = iter(proc.stdout.split("\0")[:-1])
+    for record in records:
+        added_str, deleted_str, filepath = record.split("\t", 2)
+        if not filepath:
+            next(records)  # 重命名的原路径
+            filepath = next(records)
         added = int(added_str) if added_str != "-" else 0
         deleted = int(deleted_str) if deleted_str != "-" else 0
         stats[filepath] = (added, deleted)
@@ -475,7 +349,6 @@ def get_line_stats(repo_root: str, diff_range: str) -> Dict[str, Tuple[int, int]
 def apply_exclusions(
     files: List[Tuple[str, str]],
     line_stats: Dict[str, Tuple[int, int]],
-    remote_exclusions: Optional[List[str]] = None,
 ) -> Tuple[List[Tuple[str, str]], Dict[str, List[str]]]:
     """
     对文件列表应用排除规则。
@@ -486,7 +359,6 @@ def apply_exclusions(
     """
     kept = []
     excluded_by_category: Dict[str, List[str]] = {}
-    _remote_patterns = remote_exclusions or []
 
     for status, filepath in files:
         excluded = False
@@ -497,19 +369,6 @@ def apply_exclusions(
                 excluded = True
                 break
 
-        if not excluded and _remote_patterns:
-            for pattern in _remote_patterns:
-                if fnmatch.fnmatch(filepath, pattern):
-                    excluded_by_category.setdefault("远程配置排除", []).append(filepath)
-                    excluded = True
-                    break
-
-        if not excluded:
-            added, deleted = line_stats.get(filepath, (0, 0))
-            if added == 0 and deleted == 0:
-                excluded_by_category.setdefault("空文件", []).append(filepath)
-                excluded = True
-
         if not excluded:
             kept.append((status, filepath))
 
@@ -517,6 +376,11 @@ def apply_exclusions(
 
 
 # ---------- 输出文件生成 ----------
+
+def _display_path(path: str) -> str:
+    """转义 Markdown 表格分隔符和路径中的控制字符。"""
+    return path.replace("\\", "\\\\").replace("|", "\\|").replace("\t", "\\t").replace("\r", "\\r").replace("\n", "\\n")
+
 
 def write_diff_files(
     output_path: str,
@@ -534,7 +398,7 @@ def write_diff_files(
         "| ---- | -------- |",
     ]
     for status, filepath in files:
-        lines.append(f"| {status}    | {filepath} |")
+        lines.append(f"| {status}    | {_display_path(filepath)} |")
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
@@ -572,7 +436,7 @@ def write_review_files(
 
     for status, filepath in kept:
         added, deleted = line_stats.get(filepath, (0, 0))
-        lines.append(f"| {filepath} | +{added}, -{deleted} |")
+        lines.append(f"| {_display_path(filepath)} | +{added}, -{deleted} |")
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
@@ -638,57 +502,11 @@ def write_diff_stats(
         f.write("\n")
 
 
-def run_integrated_preflight(args: argparse.Namespace, output_dir: str) -> None:
-    """在 diff 过滤完成后继续执行统一 preflight（可选资源，失败不阻塞）。"""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    preflight_script = os.path.join(script_dir, "codespec_preflight.py")
-    cmd = [
-        sys.executable,
-        preflight_script,
-        "--output-dir",
-        output_dir,
-        "--repo-root",
-        args.repo_root,
-    ]
-    if args.repo:
-        cmd += ["--repo", args.repo]
-    if args.git_remote:
-        cmd += ["--git-remote", args.git_remote]
-    if args.workflow_endpoint:
-        cmd += ["--workflow-endpoint", args.workflow_endpoint]
-    if args.codespec_endpoint:
-        cmd += ["--codespec-endpoint", args.codespec_endpoint]
-    if args.comment_lang:
-        cmd += ["--comment-lang", args.comment_lang]
-    print("[diff_and_filter] review_files.md 已生成，开始执行集成 preflight")
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    for stream in (proc.stdout, proc.stderr):
-        for line in stream.splitlines():
-            if line.strip():
-                print(line)
-    if proc.returncode != 0:
-        # preflight 只准备可选资源，失败不阻塞主流程；兜底保证
-        # custom_workflows.json 存在，下游按未配置自定义工作流处理。
-        print(
-            f"[diff_and_filter] 集成 preflight 未成功（exit_code={proc.returncode}），"
-            "不阻塞主流程，自定义工作流按未配置处理",
-            file=sys.stderr,
-        )
-        workflows_path = os.path.join(output_dir, "custom_workflows.json")
-        if not os.path.exists(workflows_path):
-            try:
-                with open(workflows_path, "w", encoding="utf-8") as f:
-                    json.dump({"repo": "", "workflows": []}, f, ensure_ascii=False, indent=2)
-                print(f"[custom-workflows] 已写入空 workflow 列表兜底: {workflows_path}")
-            except Exception as e:
-                print(f"[custom-workflows] 写空 workflow 列表失败: {e}", file=sys.stderr)
-
-
 # ---------- CLI ----------
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="执行 git diff、过滤待评审文件，并完成自定义 workflow preflight"
+        description="使用本地 git diff 生成待评审文件列表"
     )
     parser.add_argument(
         "--diff-range", required=True,
@@ -698,13 +516,8 @@ def main() -> int:
         "--repo-root", required=True, help="仓库根目录路径",
     )
     parser.add_argument(
-        "--output-dir", required=True, help="输出目录路径（写入 diff/review 文件，并承接 workflow/codespec 预检产物）",
+        "--output-dir", required=True, help="输出目录路径（写入文件列表和统计）",
     )
-    parser.add_argument("--repo", default=None, help="仓库标识 org/repo，透传给集成 preflight")
-    parser.add_argument("--git-remote", default=None, help="git remote 值，透传给集成 preflight")
-    parser.add_argument("--workflow-endpoint", default=None, help="自定义工作流接口 base url，透传给集成 preflight")
-    parser.add_argument("--codespec-endpoint", default=None, help="codespec query_spec_skills 接口 url，透传给集成 preflight")
-    parser.add_argument("--comment-lang", default="zh", choices=["zh", "en"], help="codespec 检测指令评论语言")
     args = parser.parse_args()
 
     output_dir = args.output_dir
@@ -724,14 +537,10 @@ def main() -> int:
         # 仍然输出空文件以保持流程一致
         write_diff_files(diff_files_path, [], args.diff_range)
         write_review_files(review_files_path, [], {}, 0, {})
-        try:
-            write_diff_stats(
-                diff_stats_path, args.diff_range,
-                [], [], {}, {},
-                started_at, time.time(),
-            )
-        except Exception as e:
-            print(f"Warning: 写入 diff_stats.json 失败 ({e})，不影响主流程", file=sys.stderr)
+        write_diff_stats(
+            diff_stats_path, args.diff_range,
+            [], [], {}, {}, started_at, time.time(),
+        )
         print("Diff: 0 files | Review: 0 files")
         print(f"[diff_and_filter] 执行结束, 耗时 {time.time() - started_at:.2f}s")
         return 0
@@ -742,23 +551,17 @@ def main() -> int:
     # 3. 获取行数统计
     line_stats = get_line_stats(args.repo_root, args.diff_range)
 
-    # 3.5 拉取远程排除规则
-    remote_exclusions = fetch_remote_exclusions(args.repo_root)
-
     # 4. 过滤文件
     total = len(files)
-    kept, excluded_by_category = apply_exclusions(files, line_stats, remote_exclusions)
+    kept, excluded_by_category = apply_exclusions(files, line_stats)
 
     # 5. 写入 review_files.md 和 diff_stats.json
     write_review_files(review_files_path, kept, line_stats, total, excluded_by_category)
-    try:
-        write_diff_stats(
-            diff_stats_path, args.diff_range,
-            files, kept, line_stats, excluded_by_category,
-            started_at, time.time(),
-        )
-    except Exception as e:
-        print(f"Warning: 写入 diff_stats.json 失败 ({e})，不影响主流程", file=sys.stderr)
+    write_diff_stats(
+        diff_stats_path, args.diff_range,
+        files, kept, line_stats, excluded_by_category,
+        started_at, time.time(),
+    )
 
     # 6. 输出摘要
     excluded_total = sum(len(v) for v in excluded_by_category.values())
@@ -772,7 +575,6 @@ def main() -> int:
             for fp in cat_files:
                 print(f"  [{cat}] {fp}", file=sys.stderr)
 
-    run_integrated_preflight(args, output_dir)
     print(f"[diff_and_filter] 执行结束, 耗时 {time.time() - started_at:.2f}s")
     return 0
 

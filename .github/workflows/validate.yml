@@ -32,3 +32,25 @@ jobs:
           python skills/self-improve-skills/scripts/skill_evals.py validate
           skills/mistake-notebook/evals/cases.json
           skills/self-improve-skills/evals/cases.json
+      - name: Check public code-master content
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          private = re.compile(
+              r"bytedance|bytedcli|code\.byted|bits\.byted|bnpm\.|"
+              r"agentbuddy|fluxcr|AgenticReviewExecutor|CODEBASE_JWT|CLOUD_JWT|"
+              r"query_spec_skills|satcheck|optimus\.",
+              re.IGNORECASE,
+          )
+          found = []
+          for path in Path("skills/code-master").rglob("*"):
+              if path.is_file():
+                  for line, text in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                      if private.search(text):
+                          found.append(f"{path}:{line}")
+          if found:
+              raise SystemExit("Private platform content found: " + ", ".join(found))
+          print("Public code-master content check passed")
+          PY

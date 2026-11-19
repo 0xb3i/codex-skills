@@ -4,7 +4,7 @@
 
 ## 流程
 
-1. 读取 MR 最新版本、全部评论线程和 review notes，记录 source/target commit；只处理用户指向的 MR 与仍相关的意见。
+1. 按[仓库访问](repository-access.md)读取 MR 最新版本、全部评论线程和 review notes，记录 source/target commit；只处理用户指向的 MR 与仍相关的意见。
 2. 对每条意见读取被评位置、当前实现、调用方、生产方/消费方、测试和仓库契约，分类为：`valid`、`invalid`、`outdated`、`already_fixed`、`needs_business_decision`。
 3. `invalid`：不修改代码；在原线程直接回复反证、适用契约和触发路径为何不成立。未经用户要求不为反驳另发总结评论。
 4. `outdated` / `already_fixed`：不重复改；在原线程回复当前版本的修复位置或版本证据。
