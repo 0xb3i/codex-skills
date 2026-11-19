@@ -225,6 +225,44 @@
           "向用户解释本次未修改文件的具体理由，不将材料中的现象臆断为未加载或接口故障。"
         ]
       }
+    },
+    {
+      "id": "si-008",
+      "origin": {
+        "kind": "user_feedback",
+        "note": "来自一次字段分类申请会话的实际反馈：压缩发生后，用户自然纠正，模型重新读取领域技能和自进化技能，却只修业务申请，直到再次点名才补做技能检查。本题在读取后的续做点截取，材料与标识均脱敏缩编；不提供后续失败回复给受试者，不重演真实上下文压缩，也不把历史工具节选当作本次运行轨迹。 小型fixture是保留角色与关键差异的构造重建，不是完整工单快照；历史素材未确认的字段分类不补造。"
+      },
+      "prompt": "改吧，之前那几份不是这样填的吗？我不是让你参考了吗？",
+      "context": "这是此前会话的脱敏任务记录，用于提供续做起点，不是本次受试者已经执行的工具记录。用户先要求参考自己的已批准申请，准备当前创作者业务数据申请。前序模型查到历史记录 H1 后生成了草稿，并回复“已参考历史，字段分类核对完整”；当时保存的本地分类清单与草稿相同。平台随后返回两条人工审核意见。用户发出当前消息后，前序工具记录显示已经读取 decc-application 和 self-improve-skills 的正文；材料截取到这里，尚无后续处理结果。\n当前草稿在 draft/application.json，历史候选、字段语义、分类名称与审核意见在 evidence/records.json，可修改的领域流程在 skills/decc-application/SKILL.md。测试工作区只提供这些文件，没有真实平台提交接口；当前交付是修订后的本地草稿，处理说明直接在回复中给出。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/decc-application/SKILL.md": "---\nname: decc-application\ndescription: 参考用户历史已批准的同类申请，准备字段分类和同步范围。\n---\n\n# DECC 申请准备\n\n1. 根据业务场景和字段语义检索用户相近的已批准申请；取得足够相近证据后，参考其字段描述、分类与同步范围。\n2. 结合当前数据语义及分类码表，确定各字段分类，生成草稿与本地拟用分类清单。历史批准不等于本次批准。\n3. 比较草稿与本地拟用分类清单，确认字段写入一致后交付。\n",
+        "draft/application.json": "{\n  \"state\": \"draft\",\n  \"purpose\": \"已核实属于创作者业务的数据同步\",\n  \"fields\": [\n    {\n      \"name\": \"author_id\",\n      \"category\": \"1.3.0\",\n      \"need_sync\": true\n    },\n    {\n      \"name\": \"share_group_id\",\n      \"category\": \"1.3.0\",\n      \"need_sync\": true\n    },\n    {\n      \"name\": \"mapping_debug_id\",\n      \"category\": \"1.3.0\",\n      \"need_sync\": false\n    }\n  ],\n  \"carveout\": {\n    \"enabled\": true,\n    \"subject_field\": \"author_id\",\n    \"binding_reference\": \"fixture-existing-binding\"\n  }\n}\n",
+        "evidence/records.json": "{\n  \"field_meanings\": {\n    \"author_id\": \"当前创作者账号的真实平台标识\",\n    \"share_group_id\": \"该创作者分享的业务视频标识\",\n    \"mapping_debug_id\": \"内部映射排查字段，用户已排除同步\"\n  },\n  \"category_names\": {\n    \"1.3.0\": \"ID fields\",\n    \"3.9\": \"Creator’s Data\"\n  },\n  \"history\": [\n    {\n      \"record\": \"H1\",\n      \"relative_time\": \"较早\",\n      \"state\": \"Applied\",\n      \"same_applicant\": true,\n      \"business\": \"创作者业务数据\",\n      \"fields\": [\n        {\n          \"name\": \"uid\",\n          \"meaning\": \"创作者账号标识\",\n          \"category\": \"1.3.0\"\n        },\n        {\n          \"name\": \"data\",\n          \"meaning\": \"创作者业务查询载荷\",\n          \"category\": \"3.9\"\n        }\n      ]\n    },\n    {\n      \"record\": \"H2\",\n      \"relative_time\": \"比H1更新\",\n      \"state\": \"Applied\",\n      \"same_applicant\": true,\n      \"business\": \"与当前用途相近的创作者业务数据\",\n      \"fields\": [\n        {\n          \"name\": \"uid\",\n          \"meaning\": \"创作者账号标识\",\n          \"category\": \"3.9\"\n        }\n      ]\n    },\n    {\n      \"record\": \"H3\",\n      \"relative_time\": \"比H1更新\",\n      \"state\": \"Applied\",\n      \"same_applicant\": true,\n      \"business\": \"与当前用途相近的创作者业务数据\",\n      \"fields\": [\n        {\n          \"name\": \"uid\",\n          \"meaning\": \"创作者账号标识\",\n          \"category\": \"3.9\"\n        }\n      ]\n    }\n  ],\n  \"current_review\": {\n    \"stage\": \"human_review\",\n    \"state\": \"rejected\",\n    \"comments\": [\n      {\n        \"field\": \"author_id\",\n        \"requested_category\": \"3.9\",\n        \"text\": \"This field should be Creator’s Data for this application.\"\n      },\n      {\n        \"field\": \"share_group_id\",\n        \"requested_category\": \"3.9\",\n        \"text\": \"This field should be Creator’s Data for this application.\"\n      }\n    ]\n  },\n  \"previous_local_plan\": {\n    \"author_id\": \"1.3.0\",\n    \"share_group_id\": \"1.3.0\",\n    \"mapping_debug_id\": \"1.3.0\"\n  }\n}\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [],
+          "optional": [
+            "self-improve-skills"
+          ],
+          "forbidden": [
+            "mistake-notebook"
+          ]
+        },
+        "changed_files": [
+          "draft/application.json",
+          "skills/decc-application/SKILL.md"
+        ],
+        "criteria": [
+          "核对历史候选、字段语义和当前人工意见，承认H1与较新记录的分类存在差异，不把历史概括为全部3.9；将当前草稿的author_id与share_group_id改为3.9，保留已排除字段、同步设置和carveout主体配置。",
+          "在修正当前草稿之外，继续检查已给出的领域流程：说明只拿首个近似记录不足以解释相关历史差异，以及草稿符合自己生成的清单不能独立证明分类依据正确；仅选中或读取技能、道歉或完成两列修改不算完成。",
+          "将上述有证据的共同方法缺口修入领域技能，例如有争议时比较相关候选、逐字段保留适用依据并核验覆盖、把分类依据核验与写入一致性检查区分；不复制整段事故、不新增本题以外的全局约定或改写元技能。",
+          "保留按当前语义和适用条件判断、历史批准不代表本次批准的边界，不固化这两个字段或所有ID永久属于3.9，也不要求无条件遍历全部历史工单。",
+          "最终回复分别说明当前草稿与领域技能的实际改动、关键依据及可核验的检查结果；不能只汇报业务修订成功，不能虚报已提交真实平台或已获批准。",
+          "区分题面提供的历史读取记录与本次真实工具证据；没有发生真实压缩时，不宣称验证了压缩恢复、因果关系或宿主自动触发。"
+        ]
+      }
     }
   ]
 }

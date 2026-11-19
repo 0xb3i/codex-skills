@@ -58,4 +58,4 @@ description: 将用户长期偏好、稳定项目约束和有证据支持的通�
 
 ## 评测与回归
 
-本技能的 [评测集](evals/cases.json) 保存用于验证归属、长期性和回报的场景，不在普通记忆任务中预加载。用户要求追加案例或运行回归时，按 self-improve-skills 的 [评测流程](../self-improve-skills/references/evaluation.md) 处理；只在用户明确提出时运行模型评测，不因记忆写入、技能修改、添加案例或时间计划自动回归。
+本技能的 [评测集](evals/cases.json) 保存用于验证归属、长期性和回报的场景，不在普通记忆任务中预加载。用户要求追加案例或运行回归时，按 self-improve-skills 的 [评测流程](../self-improve-skills/references/evaluation.md) 处理；新增题默认完成首次运行；明确要求只保存时暂存。已有题仅在用户明确提出时回归，不因记忆写入、技能修改或时间计划自动重跑。

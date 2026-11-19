@@ -34,7 +34,7 @@
 
 - 修改任何 Skill 后，运行 skill-creator 的 `scripts/quick_validate.py <skill-folder>`；先按技能目录定位，当前用户安装通常位于 `${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py`，不要假设命令在 PATH 中。
 - 修改脚本后，运行该脚本的最小 smoke test；没有测试入口时加一个轻量 `--help` 或 `__main__` 自检。
-- 模型行为评测与回归遵循主技能的手动触发边界；用户明确要求后按 [评测流程](evaluation.md) 使用独立子智能体，不泄露预期答案或诊断。格式校验及确定性脚本测试不能宣称模型行为已通过。
+- 模型行为评测与回归按 [评测流程](evaluation.md) 区分新题首次运行、明确暂存和已有题回归；使用独立子智能体，不泄露预期答案或诊断。格式校验及确定性脚本测试不能宣称模型行为已通过。
 
 ## 写法偏好
 

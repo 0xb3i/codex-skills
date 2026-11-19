@@ -36,14 +36,14 @@ description: 根据执行证据检查并修正已有 Skill 的触发、流程、
 5. 先找现有规则或重复段落；能改一句就不要新增一节，能改引用文件就不要撑大 `SKILL.md`。
 6. 按 [补丁策略](references/patch-policy.md) 判断来源归属、修改范围和验证要求：直接必要改进默认自动修改；潜在或未经授权的高风险优化只记录候选。
 7. 写入最小补丁；只有不应当下自动修改时，才记录候选改进到目标技能目录下的 `improvement-candidates.md`，并告诉用户是否值得现在迭代。
-8. 验证：运行技能格式校验；整组治理时运行 [只读技能审计](scripts/audit_skills.py)：`python3 "${CODEX_HOME:-$HOME/.codex}/skills/self-improve-skills/scripts/audit_skills.py"`，检查重复名称、元数据、可达本地引用和启用配置中的失效路径。改脚本时运行必要的确定性工具检查。模型行为评测与回归仅在用户明确要求时运行，不因修改技能、追加案例、定时安排而自动启动，也不以 forward-test 等名称绕过此边界。
+8. 验证：运行技能格式校验；整组治理时运行 [只读技能审计](scripts/audit_skills.py)：`python3 "${CODEX_HOME:-$HOME/.codex}/skills/self-improve-skills/scripts/audit_skills.py"`，检查重复名称、元数据、可达本地引用和启用配置中的失效路径。改脚本时运行必要的确定性工具检查。模型行为评测按评测流程区分新题首次运行与已有题回归：新题默认运行一轮建立基线，明确要求只保存时暂不运行；已有题回归仅在用户明确要求时运行，不因修改技能或定时安排自动启动，也不以 forward-test 等名称绕过此边界。
 9. 按输出规则回报实际改动；仅有候选或未完成项时，明确区分其状态。
 
 提炼粒度不清时，读取 [从现象到方法规则的示例](references/distillation-examples.md)，区分用户原话、根因和可复用规则。
 
 ## 可维护评测集
 
-用户要求建立、追加或运行评测集时，读取 [评测维护与手动回归](references/evaluation.md)。案例保存在各目标技能的 `evals/cases.json`，分别检验简介路由与执行效果；维护案例不等于授权运行。本技能的 [评测集](evals/cases.json) 只供出题与裁判读取，不在普通执行中预加载。
+用户要求建立、追加或运行评测集时，读取 [评测维护与手动回归](references/evaluation.md)。案例保存在各目标技能的 `evals/cases.json`，分别检验简介路由与执行效果；新题入库默认完成首次运行，已有题重跑与明确暂存的例外按评测流程处理。本技能的 [评测集](evals/cases.json) 只供出题与裁判读取，不在普通执行中预加载。
 
 ## 有副作用流程的验证
 
