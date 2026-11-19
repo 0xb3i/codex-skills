@@ -7,8 +7,8 @@
         "kind": "constructed",
         "note": "覆盖用户明确的跨任务偏好及实际写入后的回报。"
       },
-      "prompt": "以后整理我的材料，引用原文时请保留出处页码，除非原材料没有页码。请记住。",
-      "context": "global/AGENTS.md 是测试中的全局指令位置，没有相关约定。本次只是材料整理，当前 project/ 不存在独有的引用规则。",
+      "prompt": "整理我的材料时，原文有页码就一并带上；原材料没页码的不用编。",
+      "context": "当前可用的指令原文包括“默认用简体中文回复”“尊重用户对单次任务的特别要求”，以及当前项目的“正式产物保存到 deliverables/”。",
       "fixtures": {
         "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
         "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
@@ -39,8 +39,8 @@
         "kind": "constructed",
         "note": "覆盖一次性任务指示与长期偏好的区分。"
       },
-      "prompt": "这次请给英文版，下次再看。",
-      "context": "global/AGENTS.md 规定默认中文回复与交付；当前任务是一份待交付摘要，原文为“本季度已完成试点，下季度将扩大实施范围。”，可直接在回复中交付英文摘要。用户此前没有要求修改长期语言偏好。",
+      "prompt": "给我英文版的",
+      "context": "当前默认用简体中文回复与交付。待交付摘要原文为“本季度已完成试点，下季度将扩大实施范围。”，可直接在回复中交付英文摘要。",
       "fixtures": {
         "global/AGENTS.md": "- 默认用简体中文回复与交付。\n",
         "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
@@ -67,8 +67,8 @@
         "kind": "constructed",
         "note": "覆盖稳定项目权威来源与短期业务状态。"
       },
-      "prompt": "项目负责人确认，正式报告的指标口径以后以 docs/metrics.md 为准。还有，这周试算暂时排除北区数据。把需要长期遵守的项目约定记下来。",
-      "context": "project/AGENTS.md 是当前项目的指令文件，global/AGENTS.md 是测试中的全局指令位置。docs/metrics.md 是该项目已经存在的权威口径文件；临时排除只适用于本周试算。",
+      "prompt": "项目负责人已经定了，正式报告的指标口径就以 docs/metrics.md 为准。这周试算先排除北区数据。",
+      "context": "docs/metrics.md 是当前项目已有的指标定义文件；负责人已确认它是正式报告的权威口径来源。本周试算的日期范围仅覆盖本周。",
       "fixtures": {
         "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
         "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n",
@@ -100,8 +100,8 @@
         "kind": "constructed",
         "note": "覆盖不可推导的稳定定位信息，防止过度抽象。"
       },
-      "prompt": "以后这个项目的线上配置只认 release-us 分支的 config/us/runtime.yaml。config/row/runtime.yaml 是测试用的，这两个不要混用，记在项目约定里。",
-      "context": "这些分支与路径由项目负责人明确指定，不能从服务名称推导。project/AGENTS.md 是当前项目约定文件，尚无线上配置来源说明。",
+      "prompt": "这个项目线上取的是 release-us 分支的 config/us/runtime.yaml。config/row/runtime.yaml 只用于测试，这两个别混在一起。",
+      "context": "这些分支与路径由当前项目负责人明确确认，无法从服务名称推导。现有项目指令为“正式产物保存到 deliverables/”。",
       "fixtures": {
         "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
         "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
@@ -132,8 +132,8 @@
         "kind": "constructed",
         "note": "覆盖已存在的长期偏好；正确触发可以产生零改动。"
       },
-      "prompt": "以后每次最终只交付一个最适合用的文件，除非我明确要求多份。请记住。",
-      "context": "global/AGENTS.md 是测试中的全局指令文件，其中已有完全覆盖该要求的条目。用户没有补充新的例外或改变范围。",
+      "prompt": "我拿结果的时候，只想收到那个最合适直接用的最终文件。需要多份我会另说。",
+      "context": "当前指令原文包括“每个任务默认只交付一个最适合使用的最终文件；用户明确要求多份时按要求交付”。",
       "fixtures": {
         "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n- 每个任务默认只交付一个最适合使用的最终文件；用户明确要求多份时按要求交付。\n",
         "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
@@ -161,8 +161,8 @@
         "kind": "constructed",
         "note": "覆盖跨项目适用的领域操作方法，不将“以后”自动当作全局偏好。"
       },
-      "prompt": "以后这个平台的列表导出都要把下一页也读完。刚才只保存了第一页，帮我把已有导出技能修正好。",
-      "context": "平台接口在各项目使用相同分页协议：next_cursor 非空表示仍有记录，传入该 cursor 可读取下一页，为空时结束。skills/export-data/SKILL.md 是用户维护的操作技能，当前说明只保存第一页。",
+      "prompt": "后面的记录又没导出来。这个平台的列表我要的是完整结果，不是第一页。",
+      "context": "本次使用 export-data 流程，原文为“请求第一页，保存返回记录，完成导出”。平台文档与调用记录确认各项目使用相同分页协议：响应中的 next_cursor 非空表示仍有记录，把该值传入下一次请求可继续读取；为空时结束。",
       "fixtures": {
         "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
         "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n",
@@ -194,8 +194,8 @@
         "kind": "constructed",
         "note": "根据用户只主动运行回归的要求构造；研究笔记偏好用于检查记忆写入不触发附带回归。"
       },
-      "prompt": "以后给我的研究笔记都保留能回查的来源，帮我记下来。",
-      "context": "global/AGENTS.md 是测试中的全局指令位置，目前没有研究笔记的来源要求。用户已经明确约定：仅在用户主动提出时才运行技能回归；添加案例、修改技能或 AGENTS.md 均不自动运行回归。 这次没有提出运行评测或修改案例集。",
+      "prompt": "给我的研究笔记都得能找到原始材料，我会回头核对。",
+      "context": "当前指令原文包括“默认用简体中文回复”“尊重用户对单次任务的特别要求”，以及当前项目的“正式产物保存到 deliverables/”。用户已约定：只有主动提出时才运行技能模型评测。",
       "fixtures": {
         "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
         "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
