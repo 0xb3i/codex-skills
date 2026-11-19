@@ -1,4 +1,4 @@
 interface:
   display_name: "技能自改进"
-  short_description: "依据执行证据修订所属技能，修复同类问题的共同原因并验证效果"
-  default_prompt: "请使用 $self-improve-skills 分析本次执行中的问题或改进建议，修订所属技能中证据充分、可复用的操作方法，并验证改动。"
+  short_description: "按原则覆盖范围分流并维护现有技能，成体系后再按治理范围抽取技能"
+  default_prompt: "请使用 $self-improve-skills 判断本次改进原则的覆盖范围，维护职责匹配的现有技能，并验证改动。"

@@ -1,4 +1,4 @@
 interface:
   display_name: "错题本"
-  short_description: "提炼长期偏好与稳定约束，按范围写入 AGENTS.md，避免案例补丁堆积"
-  default_prompt: "使用 $mistake-notebook 判断本次纠正中哪些属于长期约定，并将证据充分、可复用且尚未覆盖的原则写入合适的 AGENTS.md。"
+  short_description: "按原则本身的覆盖范围归档，上层原则归全局，任务规则归现有技能"
+  default_prompt: "使用 $mistake-notebook 判断本次原则本身覆盖哪些任务，将跨业务顶层原则或项目契约写入相应 AGENTS.md，任务专属要求交由现有 Skill 维护。"
