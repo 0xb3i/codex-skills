@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="260" viewBox="0 0 1280 260" role="img" aria-labelledby="title desc">
+  <title id="title">Codex Skills</title>
+  <desc id="desc">面向 Codex 的代码、设计与写作工作流</desc>
+  <rect width="1280" height="260" rx="16" fill="#F6F5F0"/>
+  <text x="64" y="63" fill="#676A60" font-size="15" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" letter-spacing="3">CURATED WORKFLOWS</text>
+  <text x="60" y="158" fill="#252C26" font-size="82" font-weight="650" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" letter-spacing="-4">Codex Skills</text>
+  <text x="64" y="208" fill="#676A60" font-size="22" font-family="-apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif">代码、设计与写作的可复用工作流</text>
+  <g transform="translate(1018 56)">
+    <path d="M-26 0h-14v148h14M150 0h14v148h-14" fill="none" stroke="#BEC4B8" stroke-width="3"/>
+    <rect x="0" y="0" width="54" height="40" rx="7" fill="#2F5847"/>
+    <rect x="70" y="0" width="54" height="40" rx="7" fill="#CAD8C5"/>
+    <rect x="0" y="54" width="54" height="40" rx="7" fill="#E1E5D8"/>
+    <rect x="70" y="54" width="54" height="40" rx="7" fill="#DA8D53"/>
+    <rect x="0" y="108" width="54" height="40" rx="7" fill="#CAD8C5"/>
+    <rect x="70" y="108" width="54" height="40" rx="7" fill="#2F5847"/>
+  </g>
+</svg>
