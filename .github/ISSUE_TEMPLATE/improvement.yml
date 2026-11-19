@@ -1,0 +1,19 @@
+name: 改进建议
+description: 建议改进已有技能或收录新的技能
+title: "[建议] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 使用场景
+      description: 说明要完成的任务，以及当前技能遇到的问题。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议改动
+      description: 新增技能时，说明与现有技能的职责区别。
+    validations:
+      required: true

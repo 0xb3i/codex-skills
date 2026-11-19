@@ -1,0 +1,25 @@
+name: 问题反馈
+description: 报告技能指令、脚本或资源引用的问题
+title: "[问题] "
+labels: ["bug"]
+body:
+  - type: input
+    id: skill
+    attributes:
+      label: 相关技能
+      placeholder: writing-style
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现方式
+      description: 提供具体任务、操作步骤及相关环境，使用脱敏材料。
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 实际表现与期望结果
+    validations:
+      required: true

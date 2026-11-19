@@ -3,12 +3,14 @@
 </p>
 
 <p align="center">
-  为 Codex 提供工程实践、写作规范与技能维护方法。
+  面向 Codex 的精选 Skills，覆盖代码开发、中文写作、界面规范与技能维护。
 </p>
 
 <p align="center">
+  <a href="https://github.com/0xb3i/codex-skills/actions/workflows/validate.yml"><img src="https://github.com/0xb3i/codex-skills/actions/workflows/validate.yml/badge.svg?branch=main" alt="技能校验"></a>&nbsp;&nbsp;&nbsp;&nbsp;
   <a href="#技能">浏览技能</a>&nbsp;&nbsp;&nbsp;&nbsp;
   <a href="#开始使用">开始使用</a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="CONTRIBUTING.md">参与贡献</a>&nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://github.com/0xb3i/codex-skills/commits/main">更新记录</a>
 </p>
 
@@ -25,7 +27,9 @@
 
 ## 开始使用
 
-需要 Codex、Git 和 rsync，以下命令适用于 macOS / Linux。
+在 Codex 任务中指定技能，例如 `$writing-style 润色这份报告`。
+
+安装命令适用于 macOS / Linux，需要 Git 和 rsync。
 
 <details>
 <summary><strong>安装到当前电脑</strong></summary>
@@ -34,6 +38,7 @@
 git clone https://github.com/0xb3i/codex-skills.git ~/codex-skills
 
 for skill_dir in ~/codex-skills/skills/*; do
+  [ -f "$skill_dir/SKILL.md" ] || continue
   skill_name=$(basename "$skill_dir")
   mkdir -p "$HOME/.codex/skills/$skill_name"
   rsync -a --delete --exclude __pycache__ --exclude '*.pyc' --exclude .DS_Store \
@@ -51,4 +56,4 @@ done
 
 ---
 
-按需收录，以当前激活版本更新，移除未激活的旧技能。公开副本中的个人信息与内部写作素材已脱敏。
+欢迎通过 [Issues](https://github.com/0xb3i/codex-skills/issues) 反馈问题，通过 [Pull Request](https://github.com/0xb3i/codex-skills/pulls) 改进技能。贡献方式见 [CONTRIBUTING.md](CONTRIBUTING.md)。
