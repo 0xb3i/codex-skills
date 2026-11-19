@@ -1,0 +1,4 @@
+interface:
+  display_name: "代码大师"
+  short_description: "实现与审查共用仓库 API 复用、架构与契约标准，支持 MR 缺陷评论"
+  default_prompt: "请使用 $code-master 根据我的目标选择 implement 或 review 模式，先核实仓库已有 API、职责边界和行为契约，再完成实现或有证据的代码审查，并报告实际验证结果。"

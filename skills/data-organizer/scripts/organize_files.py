@@ -2,7 +2,6 @@
 import argparse
 import json
 import re
-import shutil
 from pathlib import Path
 
 
@@ -19,8 +18,8 @@ STOPWORDS = {
     'final', 'copy', '副本', '版本', '新建', 'untitled', 'file', 'data', 'doc',
     'document', 'report', 'result', 'results', 'v', 'ver', 'version', 'the', 'and',
 }
-SAFE_CLEAN_EXTS = {'.tmp', '.temp', '.bak', '.old', '.orig', '.swp', '.pyc'}
-SAFE_CLEAN_NAMES = {'.ds_store', 'thumbs.db', 'desktop.ini'}
+REVIEW_EXTS = {'.tmp', '.temp', '.bak', '.old', '.orig', '.swp', '.pyc'}
+REVIEW_NAMES = {'.ds_store', 'thumbs.db', 'desktop.ini'}
 
 
 def slug(text, fallback='misc'):
@@ -42,12 +41,12 @@ def tokens(text):
     return out
 
 
-def cleanup_reason(path):
+def review_reason(path):
     name = path.name.lower()
-    if name in SAFE_CLEAN_NAMES or name.startswith('~$'):
-        return 'safe-temp-name'
-    if path.suffix.lower() in SAFE_CLEAN_EXTS:
-        return 'safe-temp-extension'
+    if name in REVIEW_NAMES or name.startswith('~$'):
+        return 'review-temp-name'
+    if path.suffix.lower() in REVIEW_EXTS:
+        return 'review-temp-extension'
     return None
 
 
@@ -79,6 +78,22 @@ def short_name(path, group, used):
     return candidate
 
 
+def flat_name(path, group, used):
+    stem = slug(path.stem, group)
+    candidate = f'{stem}{path.suffix.lower()}'
+    if candidate in used:
+        candidate = f'{group}-{stem}{path.suffix.lower()}'
+    if candidate not in used:
+        used.add(candidate)
+        return candidate
+    i = 2
+    while f'{group}-{stem}-{i}{path.suffix.lower()}' in used:
+        i += 1
+    candidate = f'{group}-{stem}-{i}{path.suffix.lower()}'
+    used.add(candidate)
+    return candidate
+
+
 def iter_files(root, target_root):
     for path in root.rglob('*'):
         if not path.is_file():
@@ -92,49 +107,48 @@ def iter_files(root, target_root):
 
 
 def build_plan(root, target_root):
-    moves, cleanup, used_by_group = [], [], {}
+    moves, cleanup_candidates, grouped = [], [], {}
     for path in sorted(iter_files(root, target_root)):
-        reason = cleanup_reason(path)
+        reason = review_reason(path)
         if reason:
-            cleanup.append({'path': str(path), 'reason': reason})
+            cleanup_candidates.append({'path': str(path), 'reason': reason})
             continue
         group = group_for(path, root)
-        used = used_by_group.setdefault(group, set())
-        name = short_name(path, group, used)
-        moves.append({'source': str(path), 'target': str(target_root / group / name), 'group': group})
-    return {'root': str(root), 'target_root': str(target_root), 'moves': moves, 'cleanup': cleanup}
-
-
-def apply_plan(plan, delete_cleanup):
-    for item in plan['moves']:
-        src, dst = Path(item['source']), Path(item['target'])
-        if not src.exists():
+        grouped.setdefault(group, []).append(path)
+    used_at_root = {path.name for path in target_root.iterdir()} if target_root.exists() else set()
+    for group, paths in sorted(grouped.items()):
+        if len(paths) == 1:
+            path = paths[0]
+            name = flat_name(path, group, used_at_root)
+            moves.append({'source': str(path), 'target': str(target_root / name), 'group': group})
             continue
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(src), str(dst))
-    if delete_cleanup:
-        for item in plan['cleanup']:
-            path = Path(item['path'])
-            if path.exists():
-                path.unlink()
+        group_root = target_root / group
+        used = {path.name for path in group_root.iterdir()} if group_root.exists() else set()
+        for path in paths:
+            name = short_name(path, group, used)
+            moves.append({'source': str(path), 'target': str(target_root / group / name), 'group': group})
+    return {'root': str(root), 'target_root': str(target_root), 'moves': moves,
+            'cleanup_candidates': cleanup_candidates}
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Plan or apply shallow folder organization.')
+    parser = argparse.ArgumentParser(description='Draft a shallow folder organization plan without moving or deleting source files.')
     parser.add_argument('folder')
     parser.add_argument('--target-root')
     parser.add_argument('--out', default='organize_plan.json')
-    parser.add_argument('--apply', action='store_true')
-    parser.add_argument('--delete-cleanup', action='store_true')
     args = parser.parse_args()
 
     root = Path(args.folder).expanduser().resolve()
+    if not root.is_dir():
+        parser.error('folder must be an existing directory')
+    output = Path(args.out).expanduser().resolve()
+    if output.is_relative_to(root):
+        parser.error('--out must be outside the scanned folder')
     target_root = Path(args.target_root).expanduser().resolve() if args.target_root else root / '_organized'
     plan = build_plan(root, target_root)
-    Path(args.out).write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding='utf-8')
-    if args.apply:
-        apply_plan(plan, args.delete_cleanup)
-    print(f"moves={len(plan['moves'])} cleanup={len(plan['cleanup'])} plan={args.out}")
+    with output.open('x', encoding='utf-8') as stream:
+        stream.write(json.dumps(plan, ensure_ascii=False, indent=2))
+    print(f"moves={len(plan['moves'])} cleanup_candidates={len(plan['cleanup_candidates'])} plan={args.out}")
 
 
 if __name__ == '__main__':

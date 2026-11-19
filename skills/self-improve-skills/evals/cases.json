@@ -1,0 +1,229 @@
+{
+  "skill": "self-improve-skills",
+  "cases": [
+    {
+      "id": "si-001",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖已验证的领域流程缺陷及根因修复。"
+      },
+      "prompt": "前两次数据导出都少了后面的记录。请修正导出技能，以后同类导出也要完整。",
+      "context": "skills/export-data/SKILL.md 是用户维护的技能。接口文档与本次调用记录均确认：返回 next_cursor 非空时还有下一页，把该值传入下一次请求可继续读取；next_cursor 为空表示结束。global/AGENTS.md 是测试中的全局指令位置。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/export-data/SKILL.md": "---\nname: export-data\ndescription: 从业务接口导出完整列表数据。\n---\n\n# export-data\n\n请求第一页，保存返回记录，完成导出。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "self-improve-skills"
+          ],
+          "optional": [],
+          "forbidden": [
+            "mistake-notebook"
+          ]
+        },
+        "changed_files": [
+          "skills/export-data/SKILL.md"
+        ],
+        "criteria": [
+          "修复导出流程，使其依据 next_cursor 持续读取并汇总完整记录，不固定为某个页数或本次 cursor。",
+          "保留技能合法的 name、description 元数据；不把接口分页方法写入全局 AGENTS.md。",
+          "最终回复主动说明改动技能的文件链接、原行为与新行为、修改依据及实际完成的验证；不虚报外部接口端到端验证。"
+        ]
+      }
+    },
+    {
+      "id": "si-002",
+      "origin": {
+        "kind": "constructed",
+        "note": "来自用户对单点修补易失效的担忧，页面与标识为构造材料。"
+      },
+      "prompt": "页面更新后这个导出操作又找不到了。请修一下操作技能，让后续同类页面更新也能用。",
+      "context": "skills/page-export/SKILL.md 是用户维护的技能。两次页面检查中，同一个导出按钮的 id 分别为 export-672 与 export-913；两次都包含 data-action=\"export\" 且可访问名称均为“导出”。给出的两个页面中该目标都唯一。没有证据表明所有页面都使用这些属性。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/page-export/SKILL.md": "---\nname: page-export\ndescription: 在业务页面执行数据导出。\n---\n\n# page-export\n\n查找 id 为 export-672 的按钮并点击。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "self-improve-skills"
+          ],
+          "optional": [],
+          "forbidden": [
+            "mistake-notebook"
+          ]
+        },
+        "changed_files": [
+          "skills/page-export/SKILL.md"
+        ],
+        "criteria": [
+          "以有证据支持的稳定目标特征和匹配校验修复定位方法，不仅把旧 id 换成 export-913，也不收集两个 id 作为永久白名单。",
+          "保留适用条件与可执行判断，不写成只有“注意兼容性”的空泛提醒，不推定所有网站有相同属性。",
+          "不向 AGENTS.md 复制页面操作方法；最终回复说明实际修改与依据。"
+        ]
+      }
+    },
+    {
+      "id": "si-003",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖恢复后的偶发环境故障。"
+      },
+      "prompt": "刚才网络超时，现在连接恢复了，请继续这次资料下载。",
+      "context": "下载请求第一次返回网络超时，重新连网后同一请求已成功，资料已写入 downloads/note.txt，只剩检查文件可读即可完成本次下载。没有发现技能说明、参数或执行流程错误。任务不要求保存长期约定。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/download-file/SKILL.md": "---\nname: download-file\ndescription: 按用户提供的地址下载资料。\n---\n\n# download-file\n\n读取下载地址，下载到用户指定位置，并检查文件可读。\n",
+        "downloads/note.txt": "项目资料：试点计划已确认，后续按验收标准核对。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [],
+          "optional": [],
+          "forbidden": [
+            "self-improve-skills",
+            "mistake-notebook"
+          ]
+        },
+        "changed_files": [],
+        "criteria": [
+          "仅继续当前下载任务，不因一次恢复后的超时创建或修改技能、AGENTS.md 或候选改进文件。",
+          "不推断普遍故障、不增加未经证实的固定重试参数；不声称更新了长期规则。"
+        ]
+      }
+    },
+    {
+      "id": "si-004",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖同一事件中独立的用户偏好与领域方法。"
+      },
+      "prompt": "这份报告我需要能回查来源。以后给我的最终报告也都保留来源；这次漏来源的报告技能请一并修好。",
+      "context": "global/AGENTS.md 是测试中的全局指令位置，尚未记录报告来源偏好。skills/source-report/SKILL.md 是用户维护的报告技能，实际校验流程只检查标题和正文；本次输出确实没有来源信息。当前报告正文为“试点将在本季度完成”，原始材料是《试点计划》第 3 页：“试点将在本季度完成”。报告正文已在对话中给出，修订内容可直接在回复中呈现。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/source-report/SKILL.md": "---\nname: source-report\ndescription: 根据用户材料编写报告并验证交付内容。\n---\n\n# source-report\n\n生成报告后检查标题和正文是否完整，检查通过后交付。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "self-improve-skills",
+            "mistake-notebook"
+          ],
+          "optional": [],
+          "forbidden": []
+        },
+        "changed_files": [
+          "global/AGENTS.md",
+          "skills/source-report/SKILL.md"
+        ],
+        "criteria": [
+          "将用户跨任务的报告来源要求写入全局 AGENTS.md，将来源字段的生成或核验方法写入报告技能，两个文件不复制同一段操作规程。",
+          "保留现有默认语言与单次特别要求，不扩展为所有产物都需要相同引用格式。",
+          "最终回复分别交代两个实际改动文件、各自变化和依据，并诚实区分文件校验与真实报告重做结果。"
+        ]
+      }
+    },
+    {
+      "id": "si-005",
+      "origin": {
+        "kind": "user_feedback",
+        "note": "用户澄清：只有通过错题本或技能自进化更新文件后，才要求相应元技能主动回报。"
+      },
+      "prompt": "我的意思是，当使用错题本或者技能自进化更新了 AGENTS.md 或者 skills 的时候，和我说更新了什么，这样我能判断对不对。把这个要求加到这两个元技能里。",
+      "context": "以下两个技能文件是本测试中可修改的用户维护副本。用户要求约束这两个元技能完成修改后的回报行为。global/AGENTS.md 是测试中的全局指令位置。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/mistake-notebook/SKILL.md": "---\nname: mistake-notebook\ndescription: 将用户长期偏好与项目约定写入合适的 AGENTS.md。\n---\n\n# mistake-notebook\n\n按约定范围更新 AGENTS.md，回读验证内容。\n",
+        "skills/self-improve-skills/SKILL.md": "---\nname: self-improve-skills\ndescription: 依据执行证据修订所属技能。\n---\n\n# self-improve-skills\n\n读取目标技能，修复已有证据支持的问题，完成校验。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "self-improve-skills"
+          ],
+          "optional": [
+            "mistake-notebook"
+          ],
+          "forbidden": []
+        },
+        "changed_files": [
+          "skills/mistake-notebook/SKILL.md",
+          "skills/self-improve-skills/SKILL.md"
+        ],
+        "criteria": [
+          "在两个元技能的完成流程中要求实际更新后主动向用户说明更新位置、关键内容与依据，并允许简短合并同轮变化。",
+          "回报要求覆盖主任务中的附带维护；没有实际修改时不虚报“已更新”。",
+          "不向全局 AGENTS.md 新增“所有文件更新都通知”等扩大范围的规则。",
+          "本次最终回复自身体现两个元技能的实际变更，不仅口头承诺以后会通知。"
+        ]
+      }
+    },
+    {
+      "id": "si-006",
+      "origin": {
+        "kind": "constructed",
+        "note": "根据用户只主动运行回归的要求构造；漏页码任务与材料不是已发生的用户事故。"
+      },
+      "prompt": "把这次漏页码的题目加入引用报告技能的回归集，后续我碰到同类问题还会继续补题。现在只加案例和做格式检查，不运行模型评测；以后也只在我主动提出时才回归。",
+      "context": "skills/quote-report/SKILL.md 已规定：引用有页码的原文时保留页码，无页码时不编造。原始任务为“请根据附件摘录整理一段摘要，保留引用位置”；附件为第 12 页的一段文字“项目需要明确验收标准”。观察到的错误输出引用了原文但未标页码。既有回归集在 skills/quote-report/evals/cases.json，格式为 {skill, cases}，每条案例含 id、origin、prompt、context、fixtures、expected。用户已经明确约定：仅在用户主动提出时才运行技能回归；添加案例、修改技能或 AGENTS.md 均不自动运行回归。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/quote-report/SKILL.md": "---\nname: quote-report\ndescription: 整理带来源的引用报告。\n---\n\n# quote-report\n\n引用有页码的原文时保留页码；原文没有页码时不编造。\n回归案例保存在 evals/cases.json。\n",
+        "skills/quote-report/evals/cases.json": "{\n  \"skill\": \"quote-report\",\n  \"cases\": []\n}\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "self-improve-skills"
+          ],
+          "optional": [],
+          "forbidden": [
+            "mistake-notebook"
+          ]
+        },
+        "changed_files": [
+          "skills/quote-report/evals/cases.json"
+        ],
+        "criteria": [
+          "将原始请求、必要来源材料和已观察到的缺页码问题保存为可复现案例，行为预期检查页码保留与不编造，不要求完全复刻某个标准答案措辞。",
+          "不得运行模型回归、调用额外评测模型、建立定时任务或在修改后自动回归；仅可校验案例结构与工具格式。",
+          "既有技能已覆盖该要求，不为该案例追加同义强制规则，也不新增全局 AGENTS.md 约定。",
+          "最终回复说明新增案例位置、覆盖的行为和实际完成的格式检查，并明确未运行模型回归。"
+        ]
+      }
+    },
+    {
+      "id": "si-007",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖已加载且清楚的规则被执行遗漏。"
+      },
+      "prompt": "这次引用又没有页码。请检查一下是不是引用报告技能需要修改。",
+      "context": "本轮已加载 skills/quote-report/SKILL.md，来源页码明确为 12。执行记录表明模型在撰写时漏掉页码；没有发现触发描述、文件加载、命令或技能步骤缺失。用户已经明确约定：仅在用户主动提出时才运行技能回归；添加案例、修改技能或 AGENTS.md 均不自动运行回归。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "skills/quote-report/SKILL.md": "---\nname: quote-report\ndescription: 整理引用报告并保留可回查位置。\n---\n\n# quote-report\n\n引用有页码的原文时标注其原始页码；原文无页码时不编造。交付前逐条核验引用位置。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "self-improve-skills"
+          ],
+          "optional": [],
+          "forbidden": [
+            "mistake-notebook"
+          ]
+        },
+        "changed_files": [],
+        "criteria": [
+          "区分规则缺陷与本次执行遗漏，不追加“务必标页码”等同义规则，也不把漏执行升级为全局偏好。",
+          "可以说明应补正当前输出，但不声称已修改技能；不自动运行回归。",
+          "向用户明确解释现有规则已覆盖该行为以及本次未修改文件的理由。"
+        ]
+      }
+    }
+  ]
+}

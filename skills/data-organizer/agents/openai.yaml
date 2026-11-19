@@ -1,4 +1,4 @@
 interface:
   display_name: "数据整理"
-  short_description: "整理混乱目录、合并分散审阅产物，并清理临时废弃文件"
-  default_prompt: "Use $data-organizer to organize this folder into a shallow, searchable file structure."
+  short_description: "整理数据和文档工作区，合并审阅产物，清理已确认废弃文件"
+  default_prompt: "使用 $data-organizer 将此文件夹整理为浅层、易检索的文件结构。"

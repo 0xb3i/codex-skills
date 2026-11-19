@@ -1,40 +1,55 @@
 ---
 name: self-improve-skills
-description: 复盘并改进已有 Codex Skill。Use when any Skill execution reveals a failed path, missed issue pointed out by the user, user correction, missing context, edge case, repeated workaround, simpler implementation path, stale instruction, poor trigger wording, a missed trigger for another Skill/AGENTS update, or when the user asks to update/evolve/harden/improve a Skill. Record evidence, dedupe learnings, apply necessary direct minimal patches to SKILL.md/references/scripts by default, and record candidates only for potential, long-term, uncertain, cross-skill, or high-risk improvements.
+description: 根据实际执行证据修正已有 Skill 的触发、流程、命令、引用和验证。用户提出可复用的操作方法或改进建议时主动维护所属技能；维护、拆分、去重、合并技能，以及建立评测集或明确要求技能回归时也使用。长期用户偏好与稳定项目约定由 mistake-notebook 写入 AGENTS.md；新建技能及结构设计遵循 skill-creator。
 ---
 
-# Self Improve Skills
+# 技能自我改进
 
 ## 目标
 
-把真实使用 Skill 时发现的问题，沉淀成目标 Skill 的最小、可验证改进。必要且直接影响目标 Skill 成功率、正确性或效率的问题默认直接改；潜在、长期、不确定或高风险优化才记录候选。
+把实际执行中发现的问题，以及用户提出且适用于同类任务的原则或建议，沉淀成所属技能的最小、可验证改进。最小指围绕根因控制改动范围，不指只覆盖当前单例；优先修正可复用的判断条件或共同流程。必要且直接影响目标技能成功率、正确性或效率的问题默认直接改；潜在、证据不足或未经授权的高风险优化才记录候选。
+
+## 职责与范围
+
+- 本 Skill 决定已知缺陷应修在哪里、证据是否充分及如何验证；创建技能或重建技能结构时读取 `$skill-creator`，不复制其编写规范。
+- 先区分“用户/项目长期要求什么”与“这类工作如何完成”：前者由 `$mistake-notebook` 判断是否写入 AGENTS.md；后者归所属 Skill，即使适用于多个项目也不改存全局指令。一次性要求与短期状态留在当前任务。
+- 同一事件中的偏好与操作方法可以各归其位，但不复制同一规则，也不为普通改进相互强制调用。已有约定只需执行时，不重复持久化。
+- 用户明确要求整组治理时，在指定范围内先比较职责与调用关系，再拆分、合并或删除重复规则；普通自改进仍只修证据关联的目标技能。
 
 ## 输入
 
 先确认四件事：
 
-- 目标 Skill 名称和路径。
-- 触发原因：失败路径、用户指出 agent 没注意到的问题、用户纠正、边缘 case、重复绕路、更简单路径、缺失信息、触发不准。
+- 目标技能名称和路径。
+- 触发原因：失败路径、用户指出智能体没注意到的问题、用户纠正、边缘情况、重复绕路、更简单路径、缺失信息、触发不准。
 - 证据：本轮任务中的具体现象、命令输出、错误、用户补充、成功替代路径。
 - 期望结果：记录候选、直接补丁、只给建议，或用户明确要求的范围。
 
-信息不足时，先从当前对话、目标 Skill 文件、相关脚本和引用文件里找；只有会误改时才问用户。
+信息不足时，先从当前对话、目标技能文件、相关脚本和引用文件里找；只有会误改时才问用户。
 
 ## 工作流
 
-1. 读取目标 Skill 的 `SKILL.md`，只读取和问题相关的 `references/` 或 `scripts/`。
-2. 判断根因在目标 Skill 的哪个层级：触发描述、主流程、边界处理、命令/API、验证步骤、脚本实现。
-3. 用户指出 agent 漏掉的前置步骤、恢复顺序或判断条件时，先判断是否可泛化；可泛化就补进目标 Skill，不可泛化就只完成当前任务。
-4. 用户指出“本应触发某个 Skill、AGENTS 写入或错题沉淀，但 agent 没触发”时，视为目标 Skill 的触发失败；即使现有文字看似覆盖，也必须修改触发描述或工作流，让下次更容易触发，不要以“规则已经足够，只是本次没执行”作为结论。
+1. 读取目标技能的 `SKILL.md`，只读取和问题相关的 `references/` 或 `scripts/`。
+2. 判断根因在目标技能的哪个层级：触发描述、主流程、边界处理、命令/API、验证步骤、脚本实现。
+3. 用户提出原则、建议，或指出遗漏的前置步骤、恢复顺序、判断条件时，即使没有显式要求维护技能，也先按职责分流；属于技能方法且证据充分时直接更新。提炼同类任务共有的条件，去掉偶然 ID、版本或样例，保留真实接口契约与必要参数；换一个同类实例仍应有效，超出证据支持的范围不强推通用规则。具体领域规范只写入所属技能，不收集在本 Skill 中。
+4. 用户指出漏触发时，先检查实际加载状态、描述是否覆盖场景及相邻技能是否抢占职责。只有缺陷位于技能规则才修改描述或流程；规则已经明确但执行遗漏时，不通过继续堆叠同义强制语句补救。
 5. 先找现有规则或重复段落；能改一句就不要新增一节，能改引用文件就不要撑大 `SKILL.md`。
-6. 按 `references/patch-policy.md` 判断：直接必要改进默认自动修改；潜在或高风险优化只记录候选。
-7. 写入最小补丁；只有不应当下自动修改时，才记录候选改进到目标 Skill 目录下的 `improvement-candidates.md`，并告诉用户是否值得现在迭代。
-8. 验证：运行 Skill 校验；改脚本时运行最小可执行检查；复杂流程可用子 agent 做一次 forward-test。
-9. 最终用中文说明：改了什么、跳过了什么、下次什么时候再扩展。
+6. 按 [补丁策略](references/patch-policy.md) 判断来源归属、修改范围和验证要求：直接必要改进默认自动修改；潜在或未经授权的高风险优化只记录候选。
+7. 写入最小补丁；只有不应当下自动修改时，才记录候选改进到目标技能目录下的 `improvement-candidates.md`，并告诉用户是否值得现在迭代。
+8. 验证：运行技能格式校验；整组治理时运行 [只读技能审计](scripts/audit_skills.py)：`python3 "${CODEX_HOME:-$HOME/.codex}/skills/self-improve-skills/scripts/audit_skills.py"`，检查重复名称、元数据、可达本地引用和启用配置中的失效路径。改脚本时运行必要的确定性工具检查。模型行为评测与回归仅在用户明确要求时运行，不因修改技能、追加案例、定时安排而自动启动，也不以 forward-test 等名称绕过此边界。
+9. 按输出规则回报实际改动；仅有候选或未完成项时，明确区分其状态。
+
+## 可维护评测集
+
+用户要求建立、追加或运行评测集时，读取 [评测维护与手动回归](references/evaluation.md)。案例保存在各目标技能的 `evals/cases.json`，分别检验简介路由与执行效果；维护案例不等于授权运行。本技能的 [评测集](evals/cases.json) 只供出题与裁判读取，不在普通执行中预加载。
+
+## 有副作用流程的验证
+
+涉及发布、工单、审批、收费或删除等真实副作用，且不宜重复执行时，读取 [静态契约演练](references/static-contract-test.md)，以脱敏 fixture 验证选择器、状态机和幂等性；静态演练不能宣称真实端到端通过。
 
 ## 候选记录格式
 
-当问题只是潜在影响、长期优化、不确定泛化，或涉及安全/权限/生产/跨 Skill 边界时，把记录追加到目标 Skill 的 `improvement-candidates.md`：
+当问题只是潜在影响、证据不足的优化、不确定泛化，或涉及本轮授权范围外的安全/权限/生产/跨技能调整时，把记录追加到目标技能的 `improvement-candidates.md`：
 
 ```md
 ## YYYY-MM-DD - 简短标题
@@ -42,7 +57,7 @@ description: 复盘并改进已有 Codex Skill。Use when any Skill execution re
 - 类型：failure | correction | edge_case | simpler_path | missing_context | trigger
 - 状态：candidate | patched | rejected
 - 证据：本轮可复查的具体现象。
-- 根因：目标 Skill 当前缺少或误导的地方。
+- 根因：目标技能当前缺少或误导的地方。
 - 建议补丁：一句话描述最小修改。
 - 验证方式：如何确认改动有效。
 ```
@@ -52,6 +67,7 @@ description: 复盘并改进已有 Codex Skill。Use when any Skill execution re
 ## 输出规则
 
 - 默认中文输出，除非用户明确要求英文。
+- 使用本 Skill 实际更新技能后，在最终回复中主动给出简短变更摘要，即使维护只是主任务中的附带动作。列出改动文件的可点击链接，说明新增、调整或删除了哪些关键规则及依据，并附验证结果；调整已有规则时说清行为前后变化，不能只说“已更新技能”。同轮多次修改按最终状态合并回报，便于用户复核并继续调整本元技能。
 - 优先直接完成必要补丁；不要只停在方案，也不要把明确问题推给用户决定。
-- 每次只解决本轮证据支持的问题；不要顺手重构目标 Skill。
-- 保持 Skill 简短。新增内容超过约 30 行时，优先放入 `references/` 并在 `SKILL.md` 中用一句话导航。
+- 每次只解决本轮证据支持的问题；用户明确要求技能结构治理时可按指定范围重构，其余任务不顺手扩展。
+- 保持技能简短。新增内容超过约 30 行时，优先放入 `references/` 并在 `SKILL.md` 中用一句话导航。

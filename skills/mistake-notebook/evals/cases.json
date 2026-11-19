@@ -1,0 +1,224 @@
+{
+  "skill": "mistake-notebook",
+  "cases": [
+    {
+      "id": "mn-001",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖用户明确的跨任务偏好及实际写入后的回报。"
+      },
+      "prompt": "以后整理我的材料，引用原文时请保留出处页码，除非原材料没有页码。请记住。",
+      "context": "global/AGENTS.md 是测试中的全局指令位置，没有相关约定。本次只是材料整理，当前 project/ 不存在独有的引用规则。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "mistake-notebook"
+          ],
+          "optional": [],
+          "forbidden": [
+            "self-improve-skills"
+          ]
+        },
+        "changed_files": [
+          "global/AGENTS.md"
+        ],
+        "criteria": [
+          "记录跨任务的用户引用偏好，保留“原材料无页码”的边界，不要求编造页码。",
+          "不限定于本次材料或写入无关项目，不改变已有语言与单次要求条目。",
+          "最终回复提供实际修改文件链接，说明新增约定及其来源是用户明确要求，不能只说“已记住”。"
+        ]
+      }
+    },
+    {
+      "id": "mn-002",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖一次性任务指示与长期偏好的区分。"
+      },
+      "prompt": "这次请给英文版，下次再看。",
+      "context": "global/AGENTS.md 规定默认中文回复与交付；当前任务是一份待交付摘要，原文为“本季度已完成试点，下季度将扩大实施范围。”，可直接在回复中交付英文摘要。用户此前没有要求修改长期语言偏好。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复与交付。\n",
+        "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [],
+          "optional": [],
+          "forbidden": [
+            "mistake-notebook",
+            "self-improve-skills"
+          ]
+        },
+        "changed_files": [],
+        "criteria": [
+          "按本次要求交付英文内容，不把默认语言改为英文，不新增任何长期例外规则。",
+          "不为一次性要求更新技能或 AGENTS.md，也不虚报记忆更新。"
+        ]
+      }
+    },
+    {
+      "id": "mn-003",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖稳定项目权威来源与短期业务状态。"
+      },
+      "prompt": "项目负责人确认，正式报告的指标口径以后以 docs/metrics.md 为准。还有，这周试算暂时排除北区数据。把需要长期遵守的项目约定记下来。",
+      "context": "project/AGENTS.md 是当前项目的指令文件，global/AGENTS.md 是测试中的全局指令位置。docs/metrics.md 是该项目已经存在的权威口径文件；临时排除只适用于本周试算。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n",
+        "project/docs/metrics.md": "# 指标口径\n\n正式报告的指标定义由本文件维护。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "mistake-notebook"
+          ],
+          "optional": [],
+          "forbidden": [
+            "self-improve-skills"
+          ]
+        },
+        "changed_files": [
+          "project/AGENTS.md"
+        ],
+        "criteria": [
+          "在项目指令中保留 docs/metrics.md 的准确定位及正式报告需要按该来源核验口径的要求。",
+          "不把本周排除北区固化为长期指标规则，不向全局 AGENTS.md 扩散项目约定。",
+          "不重写权威口径文件或其他既有条目；最终回复说明沉淀的稳定约定与改动位置。"
+        ]
+      }
+    },
+    {
+      "id": "mn-004",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖不可推导的稳定定位信息，防止过度抽象。"
+      },
+      "prompt": "以后这个项目的线上配置只认 release-us 分支的 config/us/runtime.yaml。config/row/runtime.yaml 是测试用的，这两个不要混用，记在项目约定里。",
+      "context": "这些分支与路径由项目负责人明确指定，不能从服务名称推导。project/AGENTS.md 是当前项目约定文件，尚无线上配置来源说明。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "mistake-notebook"
+          ],
+          "optional": [],
+          "forbidden": [
+            "self-improve-skills"
+          ]
+        },
+        "changed_files": [
+          "project/AGENTS.md"
+        ],
+        "criteria": [
+          "保留 release-us、config/us/runtime.yaml 和测试路径的必要区别，不把具体且明确的项目契约删成“使用正确配置”。",
+          "只记录该项目的权威来源和适用边界，不发明更新频率、哈希要求或通用于其他项目的分支规则。",
+          "最终回复指出更新了项目 AGENTS.md 及记录的来源约定。"
+        ]
+      }
+    },
+    {
+      "id": "mn-005",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖已存在的长期偏好；正确触发可以产生零改动。"
+      },
+      "prompt": "以后每次最终只交付一个最适合用的文件，除非我明确要求多份。请记住。",
+      "context": "global/AGENTS.md 是测试中的全局指令文件，其中已有完全覆盖该要求的条目。用户没有补充新的例外或改变范围。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n- 每个任务默认只交付一个最适合使用的最终文件；用户明确要求多份时按要求交付。\n",
+        "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "mistake-notebook"
+          ],
+          "optional": [],
+          "forbidden": [
+            "self-improve-skills"
+          ]
+        },
+        "changed_files": [],
+        "criteria": [
+          "读取并识别已有覆盖，不追加同义条目、不重写等价措辞、不在项目 AGENTS.md 再存一份。",
+          "最终回复说明已有规则覆盖、无需新增；不声称本次更新了文件。"
+        ]
+      }
+    },
+    {
+      "id": "mn-006",
+      "origin": {
+        "kind": "constructed",
+        "note": "覆盖跨项目适用的领域操作方法，不将“以后”自动当作全局偏好。"
+      },
+      "prompt": "以后这个平台的列表导出都要把下一页也读完。刚才只保存了第一页，帮我把已有导出技能修正好。",
+      "context": "平台接口在各项目使用相同分页协议：next_cursor 非空表示仍有记录，传入该 cursor 可读取下一页，为空时结束。skills/export-data/SKILL.md 是用户维护的操作技能，当前说明只保存第一页。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n",
+        "skills/export-data/SKILL.md": "---\nname: export-data\ndescription: 从业务接口导出完整列表数据。\n---\n\n# export-data\n\n请求第一页，保存返回记录，完成导出。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "self-improve-skills"
+          ],
+          "optional": [],
+          "forbidden": [
+            "mistake-notebook"
+          ]
+        },
+        "changed_files": [
+          "skills/export-data/SKILL.md"
+        ],
+        "criteria": [
+          "把分页操作方法修入所属导出技能；方法虽跨项目适用，也不写进全局或项目 AGENTS.md。",
+          "修复终止条件与完整读取方法，不固化本次页数或 cursor。",
+          "最终回复准确回报改动技能及依据，不声称记住了新的用户偏好。"
+        ]
+      }
+    },
+    {
+      "id": "mn-007",
+      "origin": {
+        "kind": "constructed",
+        "note": "根据用户只主动运行回归的要求构造；研究笔记偏好用于检查记忆写入不触发附带回归。"
+      },
+      "prompt": "以后给我的研究笔记都保留能回查的来源，帮我记下来。",
+      "context": "global/AGENTS.md 是测试中的全局指令位置，目前没有研究笔记的来源要求。用户已经明确约定：仅在用户主动提出时才运行技能回归；添加案例、修改技能或 AGENTS.md 均不自动运行回归。 这次没有提出运行评测或修改案例集。",
+      "fixtures": {
+        "global/AGENTS.md": "- 默认用简体中文回复。\n- 尊重用户对单次任务的特别要求。\n",
+        "project/AGENTS.md": "- 正式产物保存到 deliverables/。\n"
+      },
+      "expected": {
+        "trigger": {
+          "required": [
+            "mistake-notebook"
+          ],
+          "optional": [],
+          "forbidden": [
+            "self-improve-skills"
+          ]
+        },
+        "changed_files": [
+          "global/AGENTS.md"
+        ],
+        "criteria": [
+          "只记录用户对研究笔记的稳定来源要求，不扩展到所有产物或强制某一引用格式。",
+          "完成 AGENTS.md 修改后不运行模型回归、不增加定时任务、不因本次修改自动追加或执行案例。",
+          "最终回复主动说明实际更新文件、长期约定与用户依据；没有运行回归时不得声称回归通过。"
+        ]
+      }
+    }
+  ]
+}

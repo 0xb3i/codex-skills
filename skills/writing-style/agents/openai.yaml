@@ -1,0 +1,3 @@
+interface:
+  display_name: "写作风格"
+  short_description: "系统检查文风、组织、论据与平台格式，按写作场景完整修订并核验"

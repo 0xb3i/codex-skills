@@ -1,4 +1,4 @@
 interface:
   display_name: "错题本"
-  short_description: "判断并沉淀高频、隐蔽、易复发错误到合适 AGENTS.md"
-  default_prompt: "Use $mistake-notebook to record a recurring or subtle agent mistake in the right AGENTS.md."
+  short_description: "提炼长期偏好与稳定约束，按范围写入 AGENTS.md，避免案例补丁堆积"
+  default_prompt: "使用 $mistake-notebook 判断本次纠正中哪些属于长期约定，并将证据充分、可复用且尚未覆盖的原则写入合适的 AGENTS.md。"

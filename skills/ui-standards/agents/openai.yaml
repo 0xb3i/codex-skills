@@ -1,0 +1,5 @@
+interface:
+  display_name: "可视化界面规范"
+  short_description: "适用于所有可视化产物的共同规范：界面自解释、克制配色与卡片样式"
+policy:
+  allow_implicit_invocation: true
